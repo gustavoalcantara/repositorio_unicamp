@@ -40,5 +40,24 @@ education_filhos <- cor(dat$Education, dat$Fertility) #correla??o entre Educa??o
 #Identifique as áreas com fecundidade abaixo do valor médio encontrado do banco.
 fec_lower70 <- dat[which(dat$Fertility<70.14),]
 
+#Exercicio 4
+#Encontre o nível de escolaridade médio, o nível médio de catolicismo e o nível médio de urbanização das áreas com fecundidade muita baixa
+#(valor de fecundidade abaixo do Primeiro quartil). Repita a operação, porém, desta vez, considerando as áreas com o maior nível reprodutivo
+#(Valor de fecundidade acima do terceiro quartil). 
+
+fec_lower64 <- dat[which(dat$Fertility<64.7),] 
+#Descri??o das estatisticas
+summary(fec_lower64$Education) #escolaridade
+summary(fec_lower64$Catholic) #catolicismo
+summary(fec_lower64$Agriculture) #urbaniza??o
+
+#criando um novo d.f para os n?veis acima do 3? quartil ~78.45~
+fec_higher78 <- dat[which(dat$Fertility>78.45),]
+#descri??o das estatisticas
+summary(fec_higher78$Education)
+summary(fec_higher78$Catholic)
+summary(fec_higher78$Agriculture)
+
+
 
 
