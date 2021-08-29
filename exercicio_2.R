@@ -16,3 +16,15 @@ graphics.off()
 getwd()
 setwd('C:/Users/User/Desktop/Gustavo/Unicamp/Mestrado/1sem2021/dm026/exercicios/exerc2')
 dat <- read.table('C:/Users/User/Desktop/Gustavo/Unicamp/Mestrado/1sem2021/dm026/exercicios/exerc2/exercicio2.txt', sep=',', header=T)
+
+#Exercicio 1
+#Realizando a estatistica explorat?ria para todas as vari?veis
+#1) Faça uma análise descritiva das características socioeconômicas e reprodutivas das áreas no banco.
+#Valores máximo, mínimo, média, 1º Quartil e 3º Quartil e mediana)
+summary(dat$Education)
+summary(dat$Agriculture)
+summary(dat$Examination)
+summary(dat$Fertility)
+summary(dat$Catholic) 
+summary(dat$Infant.Mortality)
+
