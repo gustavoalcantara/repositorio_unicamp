@@ -36,5 +36,9 @@ catolicos_filhos <- cor(dat$Catholic, dat$Fertility)#Correla??o entre o n?mero m
 urban_filhos <- cor(dat$Agriculture, dat$Fertility) #grau de urbaniza??o e Fertilidade
 education_filhos <- cor(dat$Education, dat$Fertility) #correla??o entre Educa??o e Fertilidade
 
+#Exercicio 3
+#Identifique as áreas com fecundidade abaixo do valor médio encontrado do banco.
+fec_lower70 <- dat[which(dat$Fertility<70.14),]
+
 
 
