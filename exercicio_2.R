@@ -28,3 +28,13 @@ summary(dat$Fertility)
 summary(dat$Catholic) 
 summary(dat$Infant.Mortality)
 
+#Exercicio 2
+#Estime a correlação entre o nível de catolicismo e o número médio de filhos por mulher das localidades. 
+#Faça outras estimações, e busque outras associações com a fecundidade, desta vez,
+#considerando o grau de urbanização, o nível educacional da região e o nível de mortalidade infantil.
+catolicos_filhos <- cor(dat$Catholic, dat$Fertility)#Correla??o entre o n?mero m?dio de filhos nivel de catolicismo
+urban_filhos <- cor(dat$Agriculture, dat$Fertility) #grau de urbaniza??o e Fertilidade
+education_filhos <- cor(dat$Education, dat$Fertility) #correla??o entre Educa??o e Fertilidade
+
+
+
