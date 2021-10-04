@@ -7,8 +7,8 @@ library(ggplot2)
 library(data.table)
 library(readr)
 library(readxl)
-dir.create('temp')
-dir.create('temp_nov')
+dir.create('temp_maio')
+dir.create('temp_novembro')
 
 #baixei os dicion?rios antes para manipula??o
 #download e extra??o dos dados via R
