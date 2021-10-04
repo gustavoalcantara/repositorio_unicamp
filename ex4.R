@@ -72,4 +72,54 @@ nov %>% #as variaveis s?o iguais
 filter(nov_exerc1, garganta=='sim', respirar=='sim') -> nov_exerc1
 ftable(nov_exerc1$sex_cat~nov_exerc1$garganta) #quem mais apresentou em novembro?
 
+#Questão 2
+#Quem tomou mais providências contra doença (ficar em casa em isolamento), homens
+#ou mulheres?
+ftable(maio$A003~maio$B0031)
+maio %>%
+  filter(!is.na(B0031)) %>% 
+  select(B0031, A003, B0013, B0014) %>% 
+  mutate(sex_cat=if_else(A003==1, 'homem', "mulher")) %>% 
+  mutate(quarentena=case_when(B0031==1~ 'sim',
+                              B0031==2~'nao',
+                              B0031==9~'ignorado')) %>% 
+  mutate(dor_garganta=case_when(B0013==1~'sim',
+                                B0013==2~'nao',
+                                B0013==3~'ignorado',
+                                B0013==9~'ignorado')) %>% 
+  mutate(respirar=case_when(B0014==1~'sim',
+                            B0014==2~'nao',
+                            B0014==3~'ignorado',
+                            B0014==4~'ignorado')) %>% 
+  select(sex_cat, quarentena, dor_garganta, respirar)->maio_exerc2
+
+filter(maio_exerc2, dor_garganta=='sim', respirar=='sim', quarentena=='sim') ->maio_exerc2
+
+ftable(maio_exerc2$sex_cat~maio_exerc2$quarentena)
+
+ggplot(data=maio_exerc2)+
+  geom_bar((aes(x=as.factor(sex_cat))))
+
+#Mes de novembro
+nov %>%
+  filter(!is.na(B0031)) %>% 
+  select(B0031, A003, B0013, B0014) %>% 
+  mutate(sex_cat=if_else(A003==1, 'homem', "mulher")) %>% 
+  mutate(quarentena=case_when(B0031==1~ 'sim',
+                              B0031==2~'nao',
+                              B0031==9~'ignorado')) %>% 
+  mutate(dor_garganta=case_when(B0013==1~'sim',
+                                B0013==2~'nao',
+                                B0013==3~'ignorado',
+                                B0013==9~'ignorado')) %>% 
+  mutate(respirar=case_when(B0014==1~'sim',
+                            B0014==2~'nao',
+                            B0014==3~'ignorado',
+                            B0014==4~'ignorado')) %>% 
+  select(sex_cat, quarentena, dor_garganta, respirar)->nov_exerc2
+
+ftable(nov_exerc2$sex_cat~nov_exerc2$quarentena)
+ggplot(data=nov_exerc2)+
+  geom_bar((aes(x=as.factor(sex_cat))))
+
 
