@@ -24,6 +24,8 @@ pnad_pesos <- covid_geral %>%
   as_survey_design(ids=UPA, strata=Estrato, weights=V1032, nest=TRUE) #atribui??o dos pesos
 
 #exercicio1
+#Quem apresentou mais sintomas do Covid-19 (dificuldades de respirar e dor de
+ #garganta), homens ou mulheres? Antes de responder, trate os dados (informações faltantes, não sabe etc.).
 
 pnad_pesos %>% 
   rename(dor_gar=B0013,
@@ -52,6 +54,7 @@ pnad_pesos %>%
 #de infectadas. 
 
 #Exercicio 2
+#Quem tomou mais providências contra doença (ficar em casa em isolamento), homens ou mulheres?
 pnad_exerc2 <- pnad_pesos %>% 
   mutate(sex_cat=if_else(A003==1, 'homem', "mulher")) %>% 
   mutate(repouso=case_when(B0031==1~ 'sim',
@@ -78,6 +81,9 @@ drop_na()
 
 #########################
 #Exercicio 3
+#Construa uma nova variável que incorpore as informações sobre os sintomas de febre e tosse, e depois verifique sua relação com o nível educacional dos respondentes.
+
+
 pnad_pesos %>% 
   mutate(feb_tos=(B0011+B0012)/2) %>% #criando a variavel
   mutate(sexo=if_else(A003==1, "homem", "mulher")) %>% 
@@ -103,6 +109,8 @@ pnad_pesos %>%
 
 ############
 #exercicio 4
+# Construa um gráfico que mostre a mudança no tempo (Maio e Novembro no eixo x)
+dos percentuais de pessoas que sentiram ou não dificuldades de respirar.
 pnad_exerc4 <- pnad_pesos %>% 
   mutate(mes=if_else(V1013==5,'maio', 'novembro')) %>% 
   mutate(dif_resp=case_when(B0014==1~'sim',
