@@ -1,0 +1,189 @@
+#Gustavo Casteletti de Alc?ntara
+#Preparando o ambiente#
+rm( list = ls() )
+gc(reset = TRUE)
+graphics.off()
+getwd()
+setwd('C:\\Users\\User\\Desktop\\Gustavo\\Unicamp\\Mestrado\\1sem2021\\dm026\\exercicio_final')
+library(data.table)
+library(dplyr)
+library(survey) 
+library(srvyr) 
+library(ggplot2)
+library(forcats)
+library(tidyverse)
+
+
+data1991 <- fread('1991.csv', header=T, sep= ',')
+
+data2010 <- fread('2010.csv', header=T, sep= ',')
+
+#Vou atribuir um Rbind para os dados porque vou utiliza-lo ao longo dos exercicios. 
+
+rbind(data1991, data2010) -> dados
+
+#exercicio 1 construa pir?mides et?rias com grupos quinquenais de idade para os anos censit?rios, tendo 80 anos ou mais como limite superior de idade
+
+#Preparando a base de dados de 1991
+data1991 %>%
+  select(AGE, YEAR, SEX) %>%
+  mutate(sexo=if_else(SEX==1, 'homem', 'mulher')) %>% 
+  mutate(grupos=cut(AGE, c(seq(0,80,5),Inf), right = FALSE)) %>% 
+  count(grupos, YEAR, sexo) -> pop1991
+
+#Preparando a base de 2010
+data2010 %>%
+  select(AGE, YEAR, SEX) %>%
+  mutate(sexo=if_else(SEX==1, 'homem', 'mulher')) %>% 
+  mutate(grupos=cut(AGE, c(seq(0,80,5),Inf), right = FALSE)) %>% 
+  count(grupos, YEAR, sexo) ->pop2010
+
+#plotando a pir?mide et?ria de 1991
+windows()
+ggplot(pop1991, aes(x=grupos,fill=sexo, 
+                    y=ifelse(sexo=='homem', -n, n)))+
+  geom_bar(stat = "identity")+
+  scale_y_continuous(limits = max(pop1991$n)*c(-1,1), labels = abs)+
+  coord_flip()+
+  labs(x = "Grupo Et?rio", y = "Total da Popula??o")
+
+#plotando a pir?mide et?ria de 2010
+windows()
+ggplot(pop2010, aes(x=grupos,fill=sexo, 
+                    y=ifelse(sexo=='homem', -n, n)))+
+  geom_bar(stat = "identity")+
+  scale_y_continuous(limits = max(pop1991$n)*c(-1,1), labels = abs)+
+  coord_flip()+
+  labs(x = "Grupo Et?rio", y = "Total da Popula??o")
+
+#exercicio 2 - Raz?o de dependencia Jovem e Idosa no Censo de 1991 e 2010. Optei por fazer por sexo para verificar se existe diferen?a. E sim, existe diferen?a.
+dados %>% 
+  mutate(sexo=if_else(SEX==1, 'homem', 'mulher')) %>% 
+  group_by(YEAR, sexo) %>% 
+  mutate(jovens=AGE<15,
+         idosos = AGE>= 65,
+         PIA= AGE%in% 15:64) %>% 
+  summarise(
+    jovens = sum(jovens),
+    idosos = sum(idosos),
+    PIA = sum(PIA)) %>% 
+  mutate(RDJ=((jovens/PIA)*100)) %>% 
+  mutate(RDI=((idosos/PIA)*100))
+
+#Exercicio 3 Veja a frequ?ncia escolar (em percentual) para os jovens de 6 a 15 anos e 16 a 18 anos nos dois Censos
+
+unique(dados$SCHOOL) #ver quantas observa??es aparecem e se s?o as mesmas no dicion?rio. Sim, s?o as mesmas. 
+
+dados %>% 
+  select(AGE, YEAR, SCHOOL, SEX) %>% 
+  mutate(sexo=if_else(SEX==1, 'homem', 'mulher')) %>% 
+  mutate(idade_escolar=case_when(AGE %in% 6:15~ '6 a 15',
+                                 AGE %in% 16:18~ '16 a 18')) %>% 
+  filter(!is.na(idade_escolar)) %>% 
+  mutate(freq_escola=case_when(SCHOOL==0~'ignorado',
+                               SCHOOL==1~'sim',
+                               SCHOOL==2~'nao',
+                               SCHOOL==3~'nao, sim no passado',
+                               SCHOOL==4~'nao, nunca')) %>% 
+  count(YEAR, freq_escola) 
+
+#Exercicio 4 Com base no valor do sal?rio-m?nimo (SM) de cada ano censit?rio, construa
+#as1 categorias de renda: 1) menos de 1 SM, 2) Mais de 1 a 2 SM, 3) Mais de 2 a 5 SM e 4)Mais de 5 SM.
+#Depois veja as rela??es entre renda e n?vel escolar e a renda e a condi??o de habita??o em 1991 e 2010.
+
+#Primeiro eu preciso visualizar os valores ?nicos das variav?is. Se n?o, perderei muito tempo atribuindo categoria no Pipe. 
+unique(data1991$OWNERSHIP)
+unique(data1991$EDATTAIN)
+
+#posterior ? isso, vou atribuir o sal?rio minimo de 1991 ?  Cr$17.000,00. Lei n? 8178 de 1991.
+dados$INCTOT <- ifelse(dados$INCTOT == 9999999, NA, dados$INCTOT) #limpando minha base
+dados$INCTOT <- ifelse(dados$INCTOT == 9999998, NA, dados$INCTOT) #limpando minha base
+
+dados %>% #trabalhando com a base de 1991
+  select(SEX, AGE, EDATTAIN, INCTOT, OWNERSHIP, YEAR) %>%
+  filter(YEAR==1991) %>% 
+  mutate(renda=case_when(INCTOT<16999~'menos de 1 sm',
+                         INCTOT %in% 17000:34000~ 'de 1 a 2 sm',
+                         INCTOT %in% 34001:85000~ 'de 2 a 5 sm',
+                         INCTOT>85001~'mais de 5 sm')) %>% 
+  mutate(nivel_escolar=case_when(EDATTAIN == 0 ~ "NIU", 
+                                 EDATTAIN == 1 ~ "Menos do prim?rio completo",
+                                 EDATTAIN == 2 ~ "Prim?rio completo",
+                                 EDATTAIN == 3 ~ "Secund?rio completo",
+                                 EDATTAIN == 4 ~ "Superior completo",
+                                 EDATTAIN == 9 ~ "Desconhecido")) %>% 
+  filter(!is.na(renda), !(AGE < 10)) ->exerc4_1991
+
+dados %>% #trabalhando com a base de 1991
+  select(SEX, AGE, EDATTAIN, INCTOT, OWNERSHIP, YEAR) %>%
+  filter(YEAR==1991) %>% 
+  mutate(renda=case_when(INCTOT<16999~'menos de 1 sm',
+                         INCTOT %in% 17000:34000~ 'de 1 a 2 sm',
+                         INCTOT %in% 34001:85000~ 'de 2 a 5 sm',
+                         INCTOT>85001~'mais de 5 sm')) %>% 
+  mutate(habitacao=case_when(OWNERSHIP == 0 ~ "NIU",
+                             OWNERSHIP == 1 ~ "Pr?pria",
+                             OWNERSHIP == 2 ~ "N?o pr?pria",
+                             OWNERSHIP == 9 ~ "Desconhecido")) %>% 
+  filter(!is.na(renda), !(AGE < 10))->exerc4_1991_habitacao 
+
+ftable(exerc4_1991$renda, exerc4_1991$nivel_escolar)
+ftable(exerc4_1991_habitacao$renda, exerc4_1991_habitacao$habitacao)
+
+dados %>% 
+  select(SEX, AGE, EDATTAIN, INCTOT, OWNERSHIPD, YEAR) %>% 
+  filter(YEAR==2010) %>% 
+  mutate(renda_real = case_when(INCTOT < 510 ~ "Menor do que um SM",
+                                INCTOT >= 510 & INCTOT <= 1020 ~ "De um a dois SMs",
+                                INCTOT > 1020 & INCTOT <= 2550 ~ "De dois a cinco SMs",
+                                INCTOT > 2550 ~ "Mais de cinco SMs")) %>% 
+  mutate(nivel_escolar=case_when(EDATTAIN == 0 ~ "NIU", 
+                                 EDATTAIN == 1 ~ "Menos do prim?rio completo",
+                                 EDATTAIN == 2 ~ "Prim?rio completo",
+                                 EDATTAIN == 3 ~ "Secund?rio completo",
+                                 EDATTAIN == 4 ~ "Superior completo",
+                                 EDATTAIN == 9 ~ "Desconhecido")) %>% 
+  filter(!is.na(renda_real), !(AGE < 10)) -> exerc4_2010_educ
+
+dados %>% 
+  select(SEX, AGE, EDATTAIN, INCTOT, OWNERSHIP, YEAR) %>% 
+  filter(YEAR==2010) %>% 
+  mutate(renda_real = case_when(INCTOT < 510 ~ "Menor do que um SM",
+                                INCTOT >= 510 & INCTOT <= 1020 ~ "De um a dois SMs",
+                                INCTOT > 1020 & INCTOT <= 2550 ~ "De dois a cinco SMs",
+                                INCTOT > 2550 ~ "Mais de cinco SMs")) %>% 
+  mutate(habitacao=case_when(OWNERSHIP == 0 ~ "NIU",
+                             OWNERSHIP == 1 ~ "Pr?pria",
+                             OWNERSHIP == 2 ~ "N?o pr?pria",
+                             OWNERSHIP == 9 ~ "Desconhecido")) %>% 
+  filter(!is.na(renda_real), !(AGE < 10))->exerc_4_2010_hab
+
+
+
+ftable(exerc4_2010_educ$renda_real, exerc4_2010_educ$nivel_escolar)
+ftable(exerc_4_2010_hab$renda_real, exerc_4_2010_hab$habitacao)
+
+
+#falta fazer para o ano de 2010
+
+#Quest?o 5 Estime a taxa de atividade econ?mica do seu estado nos dois anos censit?rios.
+#Esta taxa corresponde a raz?o entre PEA (Popula??o Economicamente Ativa) / PIA (Popula??o em Idade Ativa) vezes 100.
+#Para ambas as medidas, utilize a popula??o de 15 a 64 anos completos e, para a estimativa da PEA, use a popula??o ativa no mercado de trabalho.
+
+unique(dados$LABFORCE)
+
+dados %>% 
+  group_by(YEAR) %>% 
+  mutate(
+    PEA=AGE>= 15 & AGE<=64 & LABFORCE==2,
+    PIA=AGE>=15 & AGE <=64) %>% 
+  summarise(
+    PEA=sum(PEA),
+    PIA=sum(PIA)) %>% 
+  mutate(taxa_economica=(PEA/PIA)*100)
+
+#Fim
+
+
+
+
