@@ -53,7 +53,5 @@ ggplot(v003_censo, aes(y = sigla_uf , x = `mean(v003)`)) +
   ylab("UF") +
   geom_vline(xintercept=3.52, color="red")
 
-
-
-
 #Fim do código
+
